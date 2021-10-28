@@ -8,6 +8,33 @@ using System.Drawing;
 
 namespace MonotonePolygonsTriangulation
 {
+    public class Triangle //треугольник
+    {
+        private Point a, b, c;
+
+        public Triangle(Point a, Point b, Point c)
+        {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+        public Point getA()
+        {
+            return a;
+        }
+
+        public Point getB()
+        {
+            return b;
+        }
+
+        public Point getC()
+        {
+            return c;
+        }
+    }
+
     public partial class Form1
     {
         // нарисовать полигон
@@ -35,6 +62,34 @@ namespace MonotonePolygonsTriangulation
                 g.FillEllipse(Brushes.Black, e.X - 2, e.Y - 2, 5, 5);
             }
 
+        }
+
+        void FirstLastPrev(ref Stack<Tuple<Point, string>> st, ref Tuple<Point, string> first, ref Tuple<Point, string> last, ref Tuple<Point, string> prev)
+        {
+            if (st.Count() == 2)
+            {
+                last = st.Pop(); // последняя вершина в стеке
+                //stTempLast = last;
+                first = st.Pop(); // первая вершина в стеке
+                st.Push(first);
+                st.Push(last);
+            }
+            last = st.Pop(); // последняя вершина в стеке
+            //stTempLast = last;
+            prev = st.Pop(); // предпоследняя вершина в стеке
+            st.Push(prev);
+            st.Push(last);
+        }
+
+        // Положение точки относительно направленного ребра
+        // yb·xa - xb·ya > 0 => b слева от Oa    
+        // yb·xa - xb·ya < 0 => b справа от Oa
+        private bool PointIsLeft(Point edgeStart, Point edgeEnd, Point p)
+        {
+            int res = (p.X - edgeStart.X) * (edgeEnd.Y - edgeStart.Y) - (p.Y - edgeStart.Y) * (edgeEnd.X - edgeStart.X);
+            if (res > 0)
+                return true; // слева
+            return false; // справа
         }
 
         void TriangulationPolygon()
@@ -125,15 +180,134 @@ namespace MonotonePolygonsTriangulation
 
             // проверка вершин
             label1.Text = "";
+            int ind = 1;
             foreach (Tuple<Point, string> p in verticiesPolygon)
             {
-                label1.Text += p.Item1 + " " + p.Item2 + "\n";
+                label1.Text += ind + " " + p.Item1 + " " + p.Item2 + "\n";
+                ind++;
             }
 
             // стек для триангуляции
-            Stack<Tuple<Point, string>> st = new Stack<Tuple<Point, string>>();
+            Stack<Tuple<Point, string>> stck = new Stack<Tuple<Point, string>>();
+            // треугольники
+            Triangle[] triangles = new Triangle[polygonPoints.Count() - 2];
+            int trainPos = 0;
 
+            stck.Push(verticiesPolygon[0]); // в стек заносим левую точку
+            Tuple<Point, string> stFirst = verticiesPolygon[0];
+            Tuple<Point, string> stLast = null, stPrevLast = null, stTempLast = null;
+            for (int i = 1; i < verticiesPolygon.Count(); i++)
+             {
+                if (stck.Count() == 1)
+                    stck.Push(verticiesPolygon[i]); // добавляем в стек следующую точку из отсортированных вершин
 
+                else  // проверяем, не образуют ли они треугольник или веерообразный полигон
+                {
+                    FirstLastPrev(ref stck, ref stFirst, ref stLast, ref stPrevLast);
+
+                    /*   if (stck.Count() == 2)
+                       {
+                           stLast = stck.Pop(); // последняя вершина в стеке
+                           stTempLast = stLast;
+                           stFirst = stck.Pop(); // первая вершина в стеке
+                           stck.Push(stFirst);
+                           stck.Push(stLast);
+                       }
+                       stLast = stck.Pop(); // последняя вершина в стеке
+                       stTempLast = stLast;
+                       stPrevLast = stck.Pop(); // предпоследняя вершина в стеке
+                       stck.Push(stPrevLast);
+                       stck.Push(stLast);*/
+
+                    // 1 - если Vi соседняя с St и не соседняя с S1
+                    if ((Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stLast.Item1)) == 1 || Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stLast.Item1)) == polygonPoints.Count() - 1)
+                        && Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stFirst.Item1)) != 1 && Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stFirst.Item1)) != polygonPoints.Count() - 1)
+                    {
+                        if (verticiesPolygon[i].Item2 == "top" && PointIsLeft(verticiesPolygon[i].Item1, stLast.Item1, stPrevLast.Item1) ||
+                            verticiesPolygon[i].Item2 == "bot" && !PointIsLeft(verticiesPolygon[i].Item1, stLast.Item1, stPrevLast.Item1))
+                        {
+                            Point ab = new Point(stLast.Item1.X - stPrevLast.Item1.X, stLast.Item1.Y - stPrevLast.Item1.Y);
+                            Point bc = new Point(verticiesPolygon[i].Item1.X - stLast.Item1.X, verticiesPolygon[i].Item1.Y - stLast.Item1.Y);
+                            double rot = (ab.X * bc.Y - ab.Y * bc.X) * Math.PI / 180;
+                            // если внутренний угол St - 1 St Vi меньше 180 градусов
+                            if (stck.Count() > 1 && rot < 180)
+                            {
+                                // в список треугольников заносим этот треугольник
+                                triangles[trainPos] = new Triangle(stPrevLast.Item1, stLast.Item1, verticiesPolygon[i].Item1);
+                                stck.Pop();  // из стека удаляем St
+                            }
+                            // после этого в стек заносится vi
+                        }
+                        stck.Push(verticiesPolygon[i]);
+                        FirstLastPrev(ref stck, ref stFirst, ref stLast, ref stPrevLast);
+                    }
+
+                    // 2 - если Vi – соседняя с с S1, но не соседняя с St
+                    else if (Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stLast.Item1)) != 1 && Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stLast.Item1)) != polygonPoints.Count() - 1
+                        && (Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stFirst.Item1)) == 1 || Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stFirst.Item1)) == polygonPoints.Count() - 1))
+                    {
+                        stTempLast = stLast;
+                        // получаем веерообразный полигон
+                        while (stck.Count() > 1)
+                        {
+                            // в список треугольников заносим этот треугольник
+                            triangles[trainPos] = new Triangle(stPrevLast.Item1, stLast.Item1, verticiesPolygon[i].Item1);
+                            if (stck.Count() > 2)
+                            {
+                                stck.Pop();
+                                stLast = stck.Pop();
+                                stPrevLast = stck.Pop();
+                                stck.Push(stPrevLast);
+                                stck.Push(stLast);
+                            }
+                            else
+                                stck.Pop();
+                            trainPos++;
+                        }
+                        while (stck.Count() > 0)
+                            stck.Pop();
+                        stck.Push(stTempLast);
+                        stck.Push(verticiesPolygon[i]);
+                        /* while (stck.Count() != 1)
+                         {
+                             stck.Pop();
+                             // stck.Push(stTempLast);
+                             // stck.Push(verticiesPolygon[i]);
+                         }*/
+                    }
+
+                    // 3 - если Vi – соседняя c S1 и с St
+                    else if ((Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stLast.Item1)) == 1 || Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stLast.Item1)) == polygonPoints.Count() - 1) 
+                        && (Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stFirst.Item1)) == 1 || Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stFirst.Item1)) == polygonPoints.Count() - 1))
+                    {
+                        stLast = stPrevLast;
+                        stPrevLast = stck.Pop();
+                        triangles[trainPos] = new Triangle(stPrevLast.Item1, stLast.Item1, verticiesPolygon[i].Item1);
+                        // получаем веерообразный полигон
+                        while (stck.Count() > 1)
+                        {
+                            // в список треугольников заносим этот треугольник
+                            triangles[trainPos] = new Triangle(stPrevLast.Item1, stLast.Item1, verticiesPolygon[i].Item1);
+                            stLast = stPrevLast;
+                            if (stck.Count() > 1)
+                                stPrevLast = stck.Pop();
+                        }
+                        //stck.Push(stTempLast);
+                    }
+                    // 4 - eсли ни одна из предыдущих ситуаций не подходит, то просто добавляем Vi в стек.
+                    else
+                        stck.Push(verticiesPolygon[i]);
+                }
+
+            }
+
+            // рисуем треугольники
+            foreach(var tr in triangles)
+            {
+                g.DrawLine(new Pen(Color.Red), tr.getA(), tr.getB());
+                g.DrawLine(new Pen(Color.Red), tr.getB(), tr.getC());
+                g.DrawLine(new Pen(Color.Red), tr.getA(), tr.getC());
+            }
         }
     }
 }
