@@ -204,20 +204,6 @@ namespace MonotonePolygonsTriangulation
                 {
                     FirstLastPrev(ref stck, ref stFirst, ref stLast, ref stPrevLast);
 
-                    /*   if (stck.Count() == 2)
-                       {
-                           stLast = stck.Pop(); // последняя вершина в стеке
-                           stTempLast = stLast;
-                           stFirst = stck.Pop(); // первая вершина в стеке
-                           stck.Push(stFirst);
-                           stck.Push(stLast);
-                       }
-                       stLast = stck.Pop(); // последняя вершина в стеке
-                       stTempLast = stLast;
-                       stPrevLast = stck.Pop(); // предпоследняя вершина в стеке
-                       stck.Push(stPrevLast);
-                       stck.Push(stLast);*/
-
                     // 1 - если Vi соседняя с St и не соседняя с S1
                     if ((Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stLast.Item1)) == 1 || Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stLast.Item1)) == polygonPoints.Count() - 1)
                         && Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stFirst.Item1)) != 1 && Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stFirst.Item1)) != polygonPoints.Count() - 1)
@@ -270,12 +256,6 @@ namespace MonotonePolygonsTriangulation
                             stck.Pop();
                         stck.Push(stTempLast);
                         stck.Push(verticiesPolygon[i]);
-                        /* while (stck.Count() != 1)
-                         {
-                             stck.Pop();
-                             // stck.Push(stTempLast);
-                             // stck.Push(verticiesPolygon[i]);
-                         }*/
                     }
 
                     // 3 - если Vi – соседняя c S1 и с St
@@ -294,7 +274,6 @@ namespace MonotonePolygonsTriangulation
                             if (stck.Count() > 1)
                                 stPrevLast = stck.Pop();
                         }
-                        //stck.Push(stTempLast);
                     }
                     // 4 - eсли ни одна из предыдущих ситуаций не подходит, то просто добавляем Vi в стек.
                     else
