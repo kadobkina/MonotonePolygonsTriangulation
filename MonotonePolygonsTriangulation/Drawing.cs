@@ -11,7 +11,6 @@ namespace MonotonePolygonsTriangulation
     public class Triangle //треугольник
     {
         private Point a, b, c;
-
         public Triangle(Point a, Point b, Point c)
         {
             this.a = a;
@@ -223,6 +222,9 @@ namespace MonotonePolygonsTriangulation
                     if ((Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stLast.Item1)) == 1 || Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stLast.Item1)) == polygonPoints.Count() - 1)
                         && Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stFirst.Item1)) != 1 && Math.Abs(polygonPoints.IndexOf(verticiesPolygon[i].Item1) - polygonPoints.IndexOf(stFirst.Item1)) != polygonPoints.Count() - 1)
                     {
+                        //  В алгоритме используется тот факт, что угол vistst-1 < 180 только в том случае, когда
+                        //  либо st-1 лежит слева от вектора vist, если vi принадлежит полигону pi-1 из верхней цепочки,
+                        //  либо st-1 лежит справа от вектора vist, если vi принадлежит нижней цепочке.
                         if (verticiesPolygon[i].Item2 == "top" && PointIsLeft(verticiesPolygon[i].Item1, stLast.Item1, stPrevLast.Item1) ||
                             verticiesPolygon[i].Item2 == "bot" && !PointIsLeft(verticiesPolygon[i].Item1, stLast.Item1, stPrevLast.Item1))
                         {
@@ -236,8 +238,8 @@ namespace MonotonePolygonsTriangulation
                                 triangles[trainPos] = new Triangle(stPrevLast.Item1, stLast.Item1, verticiesPolygon[i].Item1);
                                 stck.Pop();  // из стека удаляем St
                             }
-                            // после этого в стек заносится vi
                         }
+                        // после этого в стек заносится vi
                         stck.Push(verticiesPolygon[i]);
                         FirstLastPrev(ref stck, ref stFirst, ref stLast, ref stPrevLast);
                     }
@@ -304,9 +306,12 @@ namespace MonotonePolygonsTriangulation
             // рисуем треугольники
             foreach(var tr in triangles)
             {
-                g.DrawLine(new Pen(Color.Red), tr.getA(), tr.getB());
-                g.DrawLine(new Pen(Color.Red), tr.getB(), tr.getC());
-                g.DrawLine(new Pen(Color.Red), tr.getA(), tr.getC());
+                if (tr != null)
+                {
+                    g.DrawLine(new Pen(Color.Black), tr.getA(), tr.getB());
+                    g.DrawLine(new Pen(Color.Black), tr.getB(), tr.getC());
+                    g.DrawLine(new Pen(Color.Black), tr.getA(), tr.getC());
+                }
             }
         }
     }
