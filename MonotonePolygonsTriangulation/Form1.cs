@@ -16,6 +16,7 @@ namespace MonotonePolygonsTriangulation
         Graphics g;
         bool isSomethingOnScreen = false;
         bool isDrawingMode = false;
+        List<Tuple<Point, string>> verticiesPolygon = new List<Tuple<Point, string>>();
 
         public Form1()
         {
@@ -27,6 +28,9 @@ namespace MonotonePolygonsTriangulation
         {
             canvas.Image = new Bitmap(1300, 900);
             polygonPoints.Clear();
+            verticiesPolygon.Clear();
+            labelIsMonotone.Text = "";
+            label1.Text = "";
 
             // изменение кнопки
             if (!isSomethingOnScreen)

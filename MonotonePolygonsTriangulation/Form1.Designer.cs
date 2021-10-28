@@ -33,6 +33,7 @@ namespace MonotonePolygonsTriangulation
             this.canvas = new System.Windows.Forms.PictureBox();
             this.buttonTriangulation = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.labelIsMonotone = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.canvas)).BeginInit();
             this.SuspendLayout();
             // 
@@ -70,16 +71,25 @@ namespace MonotonePolygonsTriangulation
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 171);
+            this.label1.Location = new System.Drawing.Point(12, 132);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(0, 13);
             this.label1.TabIndex = 3;
+            // 
+            // labelIsMonotone
+            // 
+            this.labelIsMonotone.AutoSize = true;
+            this.labelIsMonotone.Location = new System.Drawing.Point(18, 95);
+            this.labelIsMonotone.Name = "labelIsMonotone";
+            this.labelIsMonotone.Size = new System.Drawing.Size(0, 13);
+            this.labelIsMonotone.TabIndex = 4;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.labelIsMonotone);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.buttonTriangulation);
             this.Controls.Add(this.canvas);
@@ -98,6 +108,7 @@ namespace MonotonePolygonsTriangulation
         private System.Windows.Forms.PictureBox canvas;
         private System.Windows.Forms.Button buttonTriangulation;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label labelIsMonotone;
     }
 }
 
