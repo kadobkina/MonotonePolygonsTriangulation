@@ -117,8 +117,6 @@ namespace MonotonePolygonsTriangulation
             Point maxPointX = polygonPoints.Find(p => p.X == maxX); // самая правая точка
             int startPoint = polygonPoints.IndexOf(minPointX);
             bool isMonotone = true;
-
-            //List<Tuple<Point, string>> verticiesPolygon = new List<Tuple<Point, string>>();
             string chain = "top";
 
             if (clockwise) // если по часовой
@@ -312,14 +310,12 @@ namespace MonotonePolygonsTriangulation
                         //  В алгоритме используется тот факт, что угол vistst-1 < 180 только в том случае, когда
                         //  либо st-1 лежит слева от вектора vist, если vi принадлежит полигону pi-1 из верхней цепочки,
                         //  либо st-1 лежит справа от вектора vist, если vi принадлежит нижней цепочке.
+                        // == если внутренний угол St - 1 St Vi меньше 180 градусов
                         if (verticiesPolygon[i].Item2 == "top" && PointIsLeft(verticiesPolygon[i].Item1, stLast.Item1, stPrevLast.Item1) ||
                             verticiesPolygon[i].Item2 == "bot" && !PointIsLeft(verticiesPolygon[i].Item1, stLast.Item1, stPrevLast.Item1))
                         {
-                            Point ab = new Point(stLast.Item1.X - stPrevLast.Item1.X, stLast.Item1.Y - stPrevLast.Item1.Y);
-                            Point bc = new Point(verticiesPolygon[i].Item1.X - stLast.Item1.X, verticiesPolygon[i].Item1.Y - stLast.Item1.Y);
-                            double rot = (ab.X * bc.Y - ab.Y * bc.X) * Math.PI / 180;
-                            // если внутренний угол St - 1 St Vi меньше 180 градусов
-                            if (stck.Count() > 1 /*&& rot < 180*/)
+                            // если t > 1
+                            if (stck.Count() > 1)
                             {
                                 // в список треугольников заносим этот треугольник
                                 triangles[trainPos] = new Triangle(stPrevLast.Item1, stLast.Item1, verticiesPolygon[i].Item1);
